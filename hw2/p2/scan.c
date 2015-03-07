@@ -28,15 +28,15 @@ int main( int argc, char **argv){
 
 	// print input
 	for(int i=0;i<n;i++)
-          if (DIMENTION > 1) {
-            printf("(");
-            for (int j=0; j<DIMENTION-1; j++) {
-              printf("%.3f,", x[i].vec[j]);
-            }
-            printf("%.3f)", x[i].vec[DIMENTION-1]);
-          } else {
-            printf("%.3f ",x[i].vec[0]);
+#if (DIMONTION > 1  )
+          printf("(");
+          for (int j=0; j<DIMENTION-1; j++) {
+            printf("%.3f,", x[i].vec[j]);
           }
+          printf("%.3f)", x[i].vec[DIMENTION-1]);
+#else
+          printf("%.3f ",x[i].vec[0]);
+#endif
         printf("\n");
 
 	// scan
@@ -44,15 +44,15 @@ int main( int argc, char **argv){
 
 	//print output
         for(int i=0;i<n;i++)
-          if (DIMENTION > 1) {
-            printf("(");
-            for (int j=0; j<DIMENTION-1; j++) {
-              printf("%.3f,", x[i].vec[j]);
-            }
-            printf("%.3f)", x[i].vec[DIMENTION-1]);
-          } else {
-            printf("%.3f ",x[i].vec[0]);
+#if (DIMENTION > 1) 
+          printf("(");
+          for (int j=0; j<DIMENTION-1; j++) {
+            printf("%.3f,", x[i].vec[j]);
           }
+          printf("%.3f)", x[i].vec[DIMENTION-1]);
+#else 
+          printf("%.3f ",x[i].vec[0]);
+#endif
         printf("\n");
 
 	// clean up
