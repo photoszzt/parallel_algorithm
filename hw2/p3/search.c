@@ -2,16 +2,42 @@
 #include <stdlib.h>
 #include <mpi.h>
 #include <stdint.h>
+#include <math.h>
+#include <algorithm>
+#include <time.h>
+#include <set>
 #include "bsearch.h"
 
+
+int init_arr(MPI_Comm comm, int* arr, uint32_t arr_size) {
+  int rank, size;
+  MPI_Comm_size(comm, &size);
+  MPI_Comm_rank(comm, &rank);
+  int len = arr_size / size;
+  int low = len*rank;
+  int high = low + len;
+  srand(time(NULL));
+  std::set<uint32_t> numbers_gen;
+  for (int i = low; i < high; i++) {
+    int new_val = rand() % len + low;
+    while (numbers_gen.find(new_val) != numbers_gen.end())
+      new_val = rand() % len + low;
+    arr[i] = arr[i];
+  } 
+  sort(arr+low, arr+high);
+}
+
 int main(int argc, char** argv) {
-  if (argc != 2) {
+ if (argc != 2) {
     fprintf(stderr, "Usage: %s <size_of_array>\n", argv[0]);
     exit(EXIT_FAILURE);
   }
-  uint32_t size_of_arr = atoi(argv[1]);
+  uint32_t arr_size = atoi(argv[1]);
   MPI_Comm comm = MPI_COMM_WORLD;
+  uint32_t * arr = (uint32_t*) malloc(size_of_arr*sizeof(uint32_t));
   MPI_Init(&argc, &argv);
+  init_arr(comm, arr, arr_size);
+  bsearch(comm, keys, NUM_KEYS, arr, arr_size, NUM_THREADS);
   MPI_Finalize();
   return 0;
 }
