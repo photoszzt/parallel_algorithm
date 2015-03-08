@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
-#include <stdint.h>
 #include <math.h>
 #include <algorithm>
 #include <time.h>
@@ -9,7 +8,7 @@
 #include "bsearch.h"
 
 
-int init_arr(MPI_Comm comm, int* arr, uint32_t arr_size) {
+int init_arr(MPI_Comm comm, int* arr, int arr_size) {
   int rank, size;
   MPI_Comm_size(comm, &size);
   MPI_Comm_rank(comm, &rank);
@@ -17,7 +16,7 @@ int init_arr(MPI_Comm comm, int* arr, uint32_t arr_size) {
   int low = len*rank;
   int high = low + len;
   srand(time(NULL));
-  std::set<uint32_t> numbers_gen;
+  std::set<int> numbers_gen;
   for (int i = low; i < high; i++) {
     int new_val = rand() % len + low;
     while (numbers_gen.find(new_val) != numbers_gen.end())
@@ -32,9 +31,9 @@ int main(int argc, char** argv) {
     fprintf(stderr, "Usage: %s <size_of_array>\n", argv[0]);
     exit(EXIT_FAILURE);
   }
-  uint32_t arr_size = atoi(argv[1]);
+  int arr_size = atoi(argv[1]);
   MPI_Comm comm = MPI_COMM_WORLD;
-  uint32_t * arr = (uint32_t*) malloc(size_of_arr*sizeof(uint32_t));
+  int * arr = (int*) malloc(size_of_arr*sizeof(int));
   MPI_Init(&argc, &argv);
   init_arr(comm, arr, arr_size);
   bsearch(comm, keys, NUM_KEYS, arr, arr_size, NUM_THREADS);
