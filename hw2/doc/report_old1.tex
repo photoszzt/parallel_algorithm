@@ -1,0 +1,52 @@
+\documentclass{article}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{geometry}
+\geometry{margin=1in}
+\begin{document}
+\title{Homework 2 Report}
+\author{Yige Hu and Zhiting Zhu}
+\date{}
+\maketitle
+
+% declaration of the new block
+\algblock{ParFor}{EndParFor}
+% customising the new block
+\algnewcommand\algorithmicparfor{\textbf{parfor}}
+\algnewcommand\algorithmicpardo{\textbf{do}}
+\algnewcommand\algorithmicendparfor{\textbf{end\ parfor}}
+\algrenewtext{ParFor}[1]{\algorithmicparfor\ #1\ \algorithmicpardo}
+\algrenewtext{EndParFor}{\algorithmicendparfor}
+
+\section{P1}
+\begin{algorithmic}[1]
+\State $step = ceil(log_2(n))$
+\State $temp = n >> 1$
+\State $offset = 1$
+\ParFor{$i=1:n-1$}
+\State $x(i)=b(i)$
+\EndParFor
+\ParFor {$i=0:n/2-1$}
+\State $indx2 = offset*(2*i+2)-1$
+\State $indx1 = offset*(2*i+1)-1$
+\State $x(indx2) = a(indx2)*a(indx2-1)*...*a(indx1+1)*x(indx1)+x(indx2)$
+\State $offset *= 2$
+\State $temp = temp >> 1$
+\EndParFor
+\State $temp = 2$
+\State $offset >>= 1$
+\ParFor {$i=1:n/2-1$}
+\State $offset >>= 1$
+\If {$i < temp$}
+\State $indx2 = offset*(2*i+1)-1$
+\State $indx1 = offset*2*i-1$
+\State $x(indx2) = a(indx2)*a(indx2-1)*...*a(indx1+1)*x(indx1)+x(indx2)$
+\State $temp *= 2$
+\EndIf
+\EndParFor 
+\end{algorithmic}
+\section{P2}
+
+\section{P3}
+
+\end{document}

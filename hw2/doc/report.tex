@@ -20,31 +20,40 @@
 
 \section{P1}
 \begin{algorithmic}[1]
-\State $step = ceil(log_2(n))$
-\State $temp = n >> 1$
-\State $offset = 1$
-\ParFor{$i=1:n-1$}
-\State $x(i)=b(i)$
-\EndParFor
-\ParFor {$i=0:n/2-1$}
-\State $indx2 = offset*(2*i+2)-1$
-\State $indx1 = offset*(2*i+1)-1$
-\State $x(indx2) = a(indx2)*a(indx2-1)*...*a(indx1+1)*x(indx1)+x(indx2)$
-\State $offset *= 2$
-\State $temp = temp >> 1$
-\EndParFor
-\State $temp = 2$
-\State $offset >>= 1$
-\ParFor {$i=1:n/2-1$}
-\State $offset >>= 1$
-\If {$i < temp$}
-\State $indx2 = offset*(2*i+1)-1$
-\State $indx1 = offset*2*i-1$
-\State $x(indx2) = a(indx2)*a(indx2-1)*...*a(indx1+1)*x(indx1)+x(indx2)$
-\State $temp *= 2$
-\EndIf
-\EndParFor 
+  \Function{rec\_psum}{$a, x_0, b, n$} \label{alg:a}
+
+  \If{(n == 1)}
+  \State $s(0) = x_0; return; end;$
+  \EndIf
+
+  \State $x = zeros(n/2, 1);$
+  \State $a\_new = zeros(n/2 - 1, 1);$
+  \State $x(0) = x_0;$
+  \ParFor{$i = 1 : n$}
+  \State $x(i) = b(i);$
+  \EndParFor
+
+  \ParFor{$i = 0 : n/2 - 1$}
+  \State $y(i) = x(2*i) * a(2*i+1) + x(2*i+1);$
+  \If{(i != 0)}
+  \State $a\_new(i) = a(2*i) * a(2*i+1);$
+  \EndIf
+  \EndParFor
+
+  \State $c = $ \Call{rec\_psum}{$a\_new, y(0), y[1 : n/2 - 1], n/2$} $;$
+
+  \State $s(0) = x_0;$
+  \ParFor{$i = 1 : n - 1$}
+  \If{isOdd(i)}
+  \State $s(i) = c(i/2);$
+  \Else
+  \State $s(i) = c((i-1)/2) * a(i) + x(i);$
+  \EndIf
+  \EndParFor
+
+  \EndFunction
 \end{algorithmic}
+
 \section{P2}
 
 \section{P3}
