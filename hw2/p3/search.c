@@ -29,7 +29,9 @@ int main(int argc, char** argv) {
   int * sub_arr = (int*) malloc(sizeof(int)*len);
   MPI_Scatter(arr, len, MPI_INT, sub_arr, len, MPI_INT, 0, comm);
   MPI_Bcast(keys, NUM_KEYS, MPI_INT, 0, comm);
+#if 1
   init_and_bsearch(comm, keys, NUM_KEYS, sub_arr, len, NUM_THREADS, rank, &pos);
+#endif
   MPI_Finalize();
   free(arr);
   free(keys);
