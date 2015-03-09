@@ -34,12 +34,22 @@ int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int* arr, int arr_s
   for (i = 0; i < num_keys; i++ ) {
     int k = keys[i];
     if (k < arr[high-1] && k > arr[low]) {
-      int position = 0;
+      int position = low;
 #pragma omp parallel shared(keys, num_keys, arr, arr_size, len, low, high, k, position) private(tid, i, nthreads) num_threads(num_ts) 
       {
         tid = omp_get_thread_num();
         nthreads = omp_get_num_threads();
-        
+        int len = arr_size / num_ts;
+        int chunk_low = tid*len;
+        int chunk_high = chunk_low+len;
+        while (len != 1 && arr[low+chunk_low] < k && arr[low+chunk_high-1] > k) {
+          len = len / num_ts;
+          low += chunk_low;
+          high = low+len;
+          chunk_low = tid*len;
+          chunk_high = chunk_low+len;
+          position = low;
+        }
       }
       send_buf[0][0] = position;
       send_buf[0][1] = i;
