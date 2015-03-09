@@ -3,7 +3,8 @@
 #include <algorithm>
 #include <time.h>
 #include <set>
-#include<stdlib.h>
+#include <stdlib.h>
+#include <string.h>
 
 int init(MPI_Comm comm, int* arr, int arr_size, int low) {
   srand(time(NULL));
@@ -15,7 +16,7 @@ int init(MPI_Comm comm, int* arr, int arr_size, int low) {
     arr[i] = new_val;
     numbers_gen.insert(new_val);
   } 
-  sort(arr, arr+arr_size);
+  std::sort(arr, arr+arr_size);
 }
 
 int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int* arr, int arr_size, int num_ts, int rank, int** pos) {
@@ -35,7 +36,7 @@ int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int* arr, int arr_s
     int k = keys[i];
     if (k < arr[high-1] && k > arr[low]) {
       int position = low;
-#pragma omp parallel shared(keys, num_keys, arr, arr_size, len, low, high, k, position) private(tid, i, nthreads) num_threads(num_ts) 
+#pragma omp parallel shared(keys, num_keys, arr, arr_size, low, high, k, position, i) private(tid,nthreads) num_threads(num_ts) 
       {
         tid = omp_get_thread_num();
         nthreads = omp_get_num_threads();

@@ -1,9 +1,13 @@
 all:scan run
 
-CC=g++
+mtime.o: mtime.cpp
+	@g++ -c -Wall -O0 -g3 $< -o $@
 
-scan:scan.o genscan.o
-	@g++ scan.c genscan.c -o scan
+scan.o: scan.c
+	@g++ -c -Wall -O0 -g3 $< -o $@
+
+scan:scan.o genscan.o mtime.o
+	@g++ scan.o genscan.o mtime.o -o scan
 
 run:scan
 	@./scan 10
