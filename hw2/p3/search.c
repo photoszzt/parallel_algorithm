@@ -18,9 +18,11 @@ int main(int argc, char** argv) {
   MPI_Comm_rank(comm, &rank);
   int * arr = NULL;
   int * keys = NULL;
+  int * pos = NULL;
   if (rank == 0) {
     arr = (int*) malloc(arr_size*sizeof(int));
     keys = (int*) malloc(sizeof(int)*NUM_KEYS);
+    pos = (int*) malloc(sizeof(int)*NUM_KEYS);
     srand(time(NULL));
     for (int i = 0; i < NUM_KEYS; i++) {
       keys[i] = rand() % arr_size;
@@ -30,7 +32,7 @@ int main(int argc, char** argv) {
   int * sub_arr = (int*) malloc(sizeof(int)*len);
   MPI_Scatter(arr, len, MPI_INT, sub_arr, len, MPI_INT, 0, comm);
   MPI_Bcast(keys, NUM_KEYS, MPI_INT, 0, comm);
-  init_and_bsearch(comm, keys, NUM_KEYS, sub_arr, len, NUM_THREADS, rank);
+  init_and_bsearch(comm, keys, NUM_KEYS, sub_arr, len, NUM_THREADS, rank, pos);
   MPI_Finalize();
   return 0;
 }
