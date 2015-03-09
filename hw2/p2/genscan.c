@@ -4,6 +4,8 @@
 #include "scan.h"
 #include <math.h>
 
+//#define _DEBUG
+
 #define ubop(x1,x2) userBinaryOperator(VEC_ADD_PRE, DIMENTION)( (void *) (x1), (void *) (x2) );
 
 void genericScan(void *X, int n, size_t l)
@@ -39,7 +41,10 @@ void genericScan(void *X, int n, size_t l)
       for (j = tid; j < temp; j += nthreads) {
         int a = offset*(2*j+1)-1;
         int b = offset*(2*j)-1;
-        if ( a < n &&  b < n)
+#ifdef _DEBUG
+      printf(" off=%d,a=%d,b=%d ", offset, a, b);
+#endif
+        if ( a < n && b > 0)
           ubop(c+a*l, c+b*l);
       }
       temp *= 2;
