@@ -18,7 +18,7 @@ void userBinaryOperator(VEC_ADD_PRE, DIMENTION) ( void *x1, void *x2) {
 int main( int argc, char **argv){	
 	
 	// problem setup
-	int n=16;
+	int n=30;
 	if(argc>1) n=atoi(argv[1]);
 	vec *x = (vec *) malloc( sizeof(vec)*n) ;
 	for(int i=0;i<n;i++) {
