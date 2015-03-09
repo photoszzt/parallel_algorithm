@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "scan.h"
+#include "mtime.h"
 
 void genericScan(void *X, int n, size_t l);
 
@@ -40,7 +41,10 @@ int main( int argc, char **argv){
         printf("\n");
 
 	// scan
+  int64_t start = GetTimeMius64();
 	genericScan((void*) x,n,sizeof(vec));
+  int64_t duration = GetTimeMiusFrom(start);
+  printf("\nComputation time: %lld microseconds\n\n", (long long) duration);
 
 	//print output
         for(int i=0;i<n;i++)
