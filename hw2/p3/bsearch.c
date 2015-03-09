@@ -1,30 +1,15 @@
 #include <mpi.h>
 #include <omp.h>
-#include <algorithm>
 #include <time.h>
-#include <set>
-#include <stdlib.h>
 #include <string.h>
 
 //#define _MPI_SEND
 
-int init(MPI_Comm comm, int* arr, int arr_size, int low) {
-  srand(time(NULL));
-  std::set<int> numbers_gen;
-  for (int i = 0; i < arr_size; i++) {
-    int new_val = rand() % arr_size + low;
-    while (numbers_gen.find(new_val) != numbers_gen.end())
-      new_val = rand() % arr_size + low;
-    arr[i] = new_val;
-    numbers_gen.insert(new_val);
-  } 
-  std::sort(arr, arr+arr_size);
-}
+//#define _DEBUG
 
 int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int* arr, int arr_size, int num_ts, int rank, int** pos) {
   int low = arr_size*rank;
   int high = low+arr_size - 1;
-  init(comm, arr, arr_size, low);
   int tid; 
   int i;
   int nthreads;

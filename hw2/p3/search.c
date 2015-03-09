@@ -4,6 +4,9 @@
 #include <math.h>
 #include <time.h>
 #include "bsearch.h"
+#include <set>
+#include <stdlib.h>
+#include <algorithm>
 
 int main(int argc, char** argv) {
   if (argc != 2) {
@@ -24,6 +27,17 @@ int main(int argc, char** argv) {
     for (int i = 0; i < NUM_KEYS; i++) {
       keys[i] = rand() % arr_size;
     }
+
+    std::set<int> numbers_gen;
+    for (int i = 0; i < arr_size; i++) {
+      // TODO: Here I'm not sure whether it should be bounded by arr_size
+      int new_val = rand() % arr_size;
+      while (numbers_gen.find(new_val) != numbers_gen.end())
+        new_val = rand() % arr_size;
+      arr[i] = new_val;
+      numbers_gen.insert(new_val);
+    }
+    std::sort(arr, arr+arr_size);
   }
   int len = arr_size / size;
   int * sub_arr = (int*) malloc(sizeof(int)*len);
