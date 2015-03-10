@@ -33,7 +33,7 @@ void init(MPI_Comm comm, int* sub_arr, int arr_size, int low) {
   std::sort(sub_arr, sub_arr+arr_size);
 }
 
-void bsearch(MPI_Comm comm, int* keys, int num_keys, int* sub_arr, int arr_size, int num_ts, int rank, int** pos) {
+void bsearch(MPI_Comm comm, int* keys, int num_keys, int* sub_arr, int arr_size, int num_ts, int rank) {
 
   int low_pos = arr_size * rank;
   int high_pos = low_pos + arr_size - 1;
@@ -175,8 +175,9 @@ void bsearch(MPI_Comm comm, int* keys, int num_keys, int* sub_arr, int arr_size,
         recv_buf[0] = position + low_pos;
         recv_buf[1] = i;
       }
+
+      //(*pos)[recv_buf[1]] = recv_buf[0];
 #endif
-      (*pos)[recv_buf[1]] = recv_buf[0];
 
 #ifdef _MPI_SEND
 #ifdef _PRINT_OUT

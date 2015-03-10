@@ -12,9 +12,8 @@ int main(int argc, char** argv) {
   }
   int arr_size = atoi(argv[1]);
   MPI_Comm comm = MPI_COMM_WORLD;
-  int * arr = (int*) malloc(arr_size*sizeof(int));
   int * keys = (int*) malloc(sizeof(int)*NUM_KEYS);
-  int * pos = (int*) malloc(sizeof(int)*NUM_KEYS);
+//  int * pos = (int*) malloc(sizeof(int)*NUM_KEYS);
   MPI_Init(NULL, NULL);
   int rank, size;
   MPI_Comm_size(comm, &size);
@@ -31,6 +30,7 @@ int main(int argc, char** argv) {
   MPI_Gather(key_chunk, key_per_proc, MPI_INT,
                keys, key_per_proc, MPI_INT, 0, comm);
   MPI_Barrier(comm);
+  free(key_chunk);
 
 #ifdef _DEBUG
   if (rank == 0) {
@@ -44,8 +44,6 @@ int main(int argc, char** argv) {
 
 printf("Key prepared.... \n");
 
-//  MPI_Scatter(arr, len, MPI_INT, sub_arr, len, MPI_INT, 0, comm);
-//  MPI_Bcast(arr, arr_size, MPI_INT, 0, comm);
   MPI_Bcast(keys, NUM_KEYS, MPI_INT, 0, comm);
 
   MPI_Barrier(comm);
@@ -67,7 +65,8 @@ printf("Arr prepared.... \n");
 
 printf("Start running.... \n");
 
-  bsearch(comm, keys, NUM_KEYS, sub_arr, len, NUM_THREADS, rank, &pos);
+  bsearch(comm, keys, NUM_KEYS, sub_arr, len, NUM_THREADS, rank);
+  //bsearch(comm, keys, NUM_KEYS, sub_arr, len, NUM_THREADS, rank, &pos);
 
 printf("Rank %d finished.... \n", rank);
 
@@ -81,8 +80,7 @@ printf("Run finished.... \n");
 //  }
 
   MPI_Finalize();
-  free(arr);
   free(keys);
-  free(pos);
+//  free(pos);
   return 0;
 }
