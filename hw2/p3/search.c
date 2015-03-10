@@ -42,6 +42,7 @@ int main(int argc, char** argv) {
   }
 #endif
 
+printf("Key prepared.... \n");
 
 //  MPI_Scatter(arr, len, MPI_INT, sub_arr, len, MPI_INT, 0, comm);
 //  MPI_Bcast(arr, arr_size, MPI_INT, 0, comm);
@@ -56,19 +57,28 @@ int main(int argc, char** argv) {
   init(comm, sub_arr, len, len * rank);
   MPI_Barrier(comm);
 
+printf("Arr prepared.... \n");
+
   /** 3. Run binary search. */
   double start, end;
-  if (rank == 0) {
+//  if (rank == 0) {
     start = MPI_Wtime();
-  }
+//  }
+
+printf("Start running.... \n");
 
   bsearch(comm, keys, NUM_KEYS, sub_arr, len, NUM_THREADS, rank, &pos);
+
+printf("Rank %d finished.... \n", rank);
+
   MPI_Barrier(comm);
 
-  if (rank == 0) {
+printf("Run finished.... \n");
+
+//  if (rank == 0) {
     end = MPI_Wtime();
-    printf("Finished. Elapsed time is %f seconds\n", end - start); 
-  }
+    printf("%d Finished. Elapsed time is %f seconds\n", rank, end - start); 
+//  }
 
   MPI_Finalize();
   free(arr);

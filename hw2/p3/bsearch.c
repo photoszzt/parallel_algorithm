@@ -7,8 +7,9 @@
 #include <stdlib.h>
 #include <algorithm>
 
-#define _MPI_SEND
+//#define _MPI_SEND
 
+#define _PRINT_OUT
 //#define _DEBUG
 
 void init_keys(MPI_Comm comm, int* key_chunk, int key_per_proc, int arr_size, 
@@ -167,9 +168,11 @@ void bsearch(MPI_Comm comm, int* keys, int num_keys, int* sub_arr, int arr_size,
 #endif
       (*pos)[recv_buf[1]] = recv_buf[0];
 
-#ifdef _DEBUG
+#ifdef _MPI_SEND
+#ifdef _PRINT_OUT
       printf("#%d: key = %d, pos = %d\n", 
           recv_buf[1], keys[recv_buf[1]], recv_buf[0]);
+#endif
 #endif
     }
 

@@ -1,8 +1,8 @@
 #ifndef __BSEARCH_H__
 #define __BSEARCH_H__
 
-#define NUM_KEYS (0x1 << 20)
-//#define NUM_KEYS (0x1 << 2)
+#define NUM_KEYS (1 << 20)
+//#define NUM_KEYS (1 << 4)
 #define NUM_THREADS 6
 
 void init_keys(MPI_Comm comm, int* key_chunk, int key_per_proc, int arr_size, 
