@@ -19,30 +19,43 @@ int main(int argc, char** argv) {
   int rank, size;
   MPI_Comm_size(comm, &size);
   MPI_Comm_rank(comm, &rank);
+
+  /** 1. Key generation. */
+  MPI_Barrier(comm);
+
+  int key_per_proc = NUM_KEYS / size;
+  int * key_chunk = (int*) malloc(sizeof(int) * key_per_proc);
+  init_keys(comm, key_chunk, key_per_proc, arr_size, rank);
+  MPI_Barrier(comm);
+
+  MPI_Gather(key_chunk, key_per_proc, MPI_INT,
+               keys, key_per_proc, MPI_INT, 0, comm);
+  MPI_Barrier(comm);
+
   if (rank == 0) {
-    srand(time(NULL));
     printf("Keys:\n");
     for (int i = 0; i < NUM_KEYS; i++) {
-      keys[i] = rand() % arr_size;
       printf("%d ", keys[i]);
     }
     printf("\n");
   }
 
-  MPI_Barrier(comm);
 
-  int len = arr_size / size;
 //  MPI_Scatter(arr, len, MPI_INT, sub_arr, len, MPI_INT, 0, comm);
 //  MPI_Bcast(arr, arr_size, MPI_INT, 0, comm);
   MPI_Bcast(keys, NUM_KEYS, MPI_INT, 0, comm);
 
   MPI_Barrier(comm);
 
+  /** 2. Array initialization. */
+  int len = arr_size / size;
+
   int* sub_arr = (int *) malloc(len * sizeof(int));
   init(comm, sub_arr, len, len * rank);
   MPI_Barrier(comm);
 
 #if 1
+  /** 3. Run binary search. */
   bsearch(comm, keys, NUM_KEYS, sub_arr, len, NUM_THREADS, rank, &pos);
 #endif
 

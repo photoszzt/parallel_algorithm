@@ -11,6 +11,14 @@
 
 //#define _DEBUG
 
+int init_keys(MPI_Comm comm, int* key_chunk, int key_per_proc, int arr_size, 
+    int rank) {
+  srand(time(NULL) + rank);
+  for (int i = 0; i < key_per_proc; i++) {
+    key_chunk[i] = rand() % arr_size;
+  }
+}
+
 int init(MPI_Comm comm, int* sub_arr, int arr_size, int low) {
   srand(time(NULL));
   std::set<int> numbers_gen;
