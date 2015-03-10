@@ -22,6 +22,7 @@
 *.ps
 
 *.bak
+out
 
 scan
 search
