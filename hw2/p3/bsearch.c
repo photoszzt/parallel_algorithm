@@ -3,26 +3,47 @@
 #include <time.h>
 #include <string.h>
 #include "bsearch.h"
+#include <set>
+#include <stdlib.h>
+#include <algorithm>
 
 #define _MPI_SEND
 
 //#define _DEBUG
 
-int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int* arr, int arr_size, int num_ts, int rank, int** pos) {
+int init(MPI_Comm comm, int* sub_arr, int arr_size, int low) {
+  srand(time(NULL));
+  std::set<int> numbers_gen;
+  for (int i = 0; i < arr_size; i++) {
+    int new_val = rand() % arr_size + low;
+    while (numbers_gen.find(new_val) != numbers_gen.end())
+      new_val = rand() % arr_size + low;
+    sub_arr[i] = new_val;
+    numbers_gen.insert(new_val);
+  } 
+  std::sort(sub_arr, sub_arr+arr_size);
+}
 
-#if _DEBUG
-  printf("Rank = %d\n\tnum_keys = %d, Keys: %d %d %d %d\n\tarr_size = %d, "
-      "arrs: %d\n", 
-      rank, num_keys, keys[0], keys[1], keys[2], keys[3], arr_size, arr[0]);
-#endif
+int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int arr_size, int num_ts, int rank, int** pos) {
 
-  int low = arr_size*rank;
-  int high = low+arr_size - 1;
+  int low_pos = arr_size * rank;
+  int high_pos = low_pos + arr_size - 1;
+  int low = 0, high = arr_size - 1;
   int tid; 
   int i;
   int nthreads;
   int send_buf[2][2];
   int recv_buf[2];
+  int* sub_arr = (int *) malloc(arr_size * sizeof(int));
+
+  init(comm, sub_arr, arr_size, low_pos);
+
+#ifdef _DEBUG
+  printf("Rank = %d\n\tnum_keys = %d, Keys: %d %d %d %d\n\tarr_size = %d, "
+      "arrs: %d\n", 
+      rank, num_keys, keys[0], keys[1], keys[2], keys[3], arr_size, sub_arr[0]);
+#endif
+
   for (i = 0; i < 2; i++) {
     memset(send_buf[i], 0, sizeof(int)*2);
   }
@@ -33,16 +54,16 @@ int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int* arr, int arr_s
     bool sendout = true;
     int k = keys[i];
 
-    if (k < arr[high] && k > arr[low]) {
+    if (k < sub_arr[high] && k > sub_arr[low]) {
 
       if (arr_size - 1 <= num_ts) {
         // each thread deals with size=1 interval
-#pragma omp parallel shared(keys, num_keys, arr, arr_size, low, high, k, position, i) private(tid,nthreads) num_threads(num_ts) 
+#pragma omp parallel shared(keys, num_keys, sub_arr, arr_size, low, high, k, position, i) private(tid,nthreads) num_threads(num_ts) 
         {
           tid = omp_get_thread_num();
           nthreads = omp_get_num_threads();
 
-          if ((tid < arr_size - 1) && arr[low + tid] <= k && arr[low + tid + 1]) {
+          if ((tid < arr_size - 1) && sub_arr[low + tid] <= k && sub_arr[low + tid + 1]) {
             position = low;
           }
 #pragma omp barrier
@@ -54,7 +75,7 @@ int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int* arr, int arr_s
         while (len != 1) {
 
         // each thread deals with a interval, need binary search
-#pragma omp parallel shared(keys, num_keys, arr, arr_size, low, high, k, position, i, len) private(tid,nthreads) num_threads(num_ts) 
+#pragma omp parallel shared(keys, num_keys, sub_arr, arr_size, low, high, k, position, i, len) private(tid,nthreads) num_threads(num_ts) 
           {
             tid = omp_get_thread_num();
             nthreads = omp_get_num_threads();
@@ -66,13 +87,13 @@ int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int* arr, int arr_s
             int left = low + tid * len;
             int right = (left + len - 1) > high ? high : (left + len - 1);
 
-            if (arr[left] == k) {
+            if (sub_arr[left] == k) {
               position = left;
               len = 1;
-            } else if (arr[right] == k) {
+            } else if (sub_arr[right] == k) {
               position = right;
               len = 1;
-            } else if (arr[left] < k && arr[right] > k) {
+            } else if (sub_arr[left] < k && sub_arr[right] > k) {
               len = (len - 1) / num_ts + 1;
               low = left;
               high = right;
@@ -84,7 +105,7 @@ int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int* arr, int arr_s
         }
       }
 
-      send_buf[0][0] = position;
+      send_buf[0][0] = position + low_pos;
       send_buf[0][1] = i;
 
       MPI_Request req;
@@ -100,11 +121,11 @@ int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int* arr, int arr_s
         MPI_Wait(&req, &status);
       }
 #endif
-    } else if ((k == arr[high]) || (k == arr[low])) {
-      if (k == arr[high])
-        send_buf[1][0] = high;
+    } else if ((k == sub_arr[high]) || (k == sub_arr[low])) {
+      if (k == sub_arr[high])
+        send_buf[1][0] = high + low_pos;
       else
-        send_buf[1][0] = low;
+        send_buf[1][0] = low + low_pos;
       send_buf[1][1] = i;
 
       MPI_Request req;
@@ -135,7 +156,8 @@ int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int* arr, int arr_s
 #endif
 
       } else {
-        recv_buf[0] = position;
+        recv_buf[0] = position + low_pos;
+printf("rank = 0; position + lowpos = %d\n", position + low_pos);
         recv_buf[1] = i;
       }
 #endif

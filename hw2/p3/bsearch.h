@@ -5,6 +5,6 @@
 #define NUM_KEYS (0x1 << 2)
 #define NUM_THREADS 6
 
-int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int* arr, int arr_size, int num_ts, int rank, int** pos);
+int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int arr_size, int num_ts, int rank, int** pos);
 
 #endif // __BSEARCH_H__
