@@ -10,6 +10,6 @@ void init_keys(MPI_Comm comm, int* key_chunk, int key_per_proc, int arr_size,
 
 void init(MPI_Comm comm, int* sub_arr, int arr_size, int low);
 
-int bsearch(MPI_Comm comm, int* keys, int num_keys, int* sub_arr, int arr_size, int num_ts, int rank, int** pos);
+void bsearch(MPI_Comm comm, int* keys, int num_keys, int* sub_arr, int arr_size, int num_ts, int rank, int** pos);
 
 #endif // __BSEARCH_H__
