@@ -54,12 +54,19 @@ int main(int argc, char** argv) {
   init(comm, sub_arr, len, len * rank);
   MPI_Barrier(comm);
 
-#if 1
   /** 3. Run binary search. */
-  bsearch(comm, keys, NUM_KEYS, sub_arr, len, NUM_THREADS, rank, &pos);
-#endif
+  double start, end;
+  if (rank == 0) {
+    start = MPI_Wtime();
+  }
 
+  bsearch(comm, keys, NUM_KEYS, sub_arr, len, NUM_THREADS, rank, &pos);
   MPI_Barrier(comm);
+
+  if (rank == 0) {
+    end = MPI_Wtime();
+    printf("Finished. Elapsed time is %f seconds\n", end - start); 
+  }
 
   MPI_Finalize();
   free(arr);
