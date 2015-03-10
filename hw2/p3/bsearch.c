@@ -24,7 +24,7 @@ int init(MPI_Comm comm, int* sub_arr, int arr_size, int low) {
   std::sort(sub_arr, sub_arr+arr_size);
 }
 
-int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int arr_size, int num_ts, int rank, int** pos) {
+int bsearch(MPI_Comm comm, int* keys, int num_keys, int* sub_arr, int arr_size, int num_ts, int rank, int** pos) {
 
   int low_pos = arr_size * rank;
   int high_pos = low_pos + arr_size - 1;
@@ -34,9 +34,6 @@ int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int arr_size, int n
   int nthreads;
   int send_buf[2][2];
   int recv_buf[2];
-  int* sub_arr = (int *) malloc(arr_size * sizeof(int));
-
-  init(comm, sub_arr, arr_size, low_pos);
 
 #ifdef _DEBUG
   printf("Rank = %d\n\tnum_keys = %d, Keys: %d %d %d %d\n\tarr_size = %d, "
@@ -157,13 +154,13 @@ int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int arr_size, int n
 
       } else {
         recv_buf[0] = position + low_pos;
-printf("rank = 0; position + lowpos = %d\n", position + low_pos);
         recv_buf[1] = i;
       }
 #endif
       (*pos)[recv_buf[1]] = recv_buf[0];
 
-      printf("\npos[%d] = %d\n", recv_buf[1], recv_buf[0]);
+      printf("#%d: key = %d, pos = %d\n", 
+          recv_buf[1], keys[recv_buf[1]], recv_buf[0]);
     }
 
   }

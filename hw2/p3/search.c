@@ -26,40 +26,24 @@ int main(int argc, char** argv) {
       keys[i] = rand() % arr_size;
       printf("%d ", keys[i]);
     }
-
-#if 0
-    std::set<int> numbers_gen;
-    for (int i = 0; i < arr_size; i++) {
-      // TODO: Here I'm not sure whether it should be bounded by arr_size
-      int new_val = rand() % arr_size;
-      while (numbers_gen.find(new_val) != numbers_gen.end())
-        new_val = rand() % arr_size;
-      arr[i] = new_val;
-      numbers_gen.insert(new_val);
-    }
-    std::sort(arr, arr+arr_size);
-
-    printf("\nArrs:\n");
-    for (int i = 0; i < arr_size; i++) {
-      printf("%d ", arr[i]);
-    }
     printf("\n");
-#endif
   }
 
   MPI_Barrier(comm);
 
   int len = arr_size / size;
-  int * sub_arr = (int*) malloc(sizeof(int)*len);
 //  MPI_Scatter(arr, len, MPI_INT, sub_arr, len, MPI_INT, 0, comm);
 //  MPI_Bcast(arr, arr_size, MPI_INT, 0, comm);
   MPI_Bcast(keys, NUM_KEYS, MPI_INT, 0, comm);
 
   MPI_Barrier(comm);
 
+  int* sub_arr = (int *) malloc(len * sizeof(int));
+  init(comm, sub_arr, len, len * rank);
+  MPI_Barrier(comm);
+
 #if 1
-//  init_and_bsearch(comm, keys, NUM_KEYS, sub_arr, len, NUM_THREADS, rank, &pos);
-  init_and_bsearch(comm, keys, NUM_KEYS, len, NUM_THREADS, rank, &pos);
+  bsearch(comm, keys, NUM_KEYS, sub_arr, len, NUM_THREADS, rank, &pos);
 #endif
 
   MPI_Barrier(comm);
