@@ -126,6 +126,11 @@ void bsearch(MPI_Comm comm, int* keys, int num_keys, int* sub_arr, int arr_size,
         MPI_Isend(send_buf[0], 2, MPI_INT, 0, 2, comm, &req);
         MPI_Wait(&req, &status);
       }
+#else
+#ifdef _PRINT_OUT
+      printf("#%d: key = %d, pos = %d\n", 
+          i, k, send_buf[0][0]);
+#endif
 #endif
     } else if ((k == sub_arr[high]) || (k == sub_arr[low])) {
       if (k == sub_arr[high])
@@ -146,6 +151,11 @@ void bsearch(MPI_Comm comm, int* keys, int num_keys, int* sub_arr, int arr_size,
         MPI_Isend(send_buf[1], 2, MPI_INT, 0, 1, comm, &req);
         MPI_Wait(&req, &status);
       }
+#else
+#ifdef _PRINT_OUT
+      printf("#%d: key = %d, pos = %d\n", 
+          i, k, send_buf[1][0]);
+#endif
 #endif
     } 
     if (rank == 0) {
