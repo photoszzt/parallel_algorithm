@@ -2,12 +2,20 @@
 #include <omp.h>
 #include <time.h>
 #include <string.h>
+#include "bsearch.h"
 
 #define _MPI_SEND
 
 //#define _DEBUG
 
 int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int* arr, int arr_size, int num_ts, int rank, int** pos) {
+
+#if _DEBUG
+  printf("Rank = %d\n\tnum_keys = %d, Keys: %d %d %d %d\n\tarr_size = %d, "
+      "arrs: %d\n", 
+      rank, num_keys, keys[0], keys[1], keys[2], keys[3], arr_size, arr[0]);
+#endif
+
   int low = arr_size*rank;
   int high = low+arr_size - 1;
   int tid; 
@@ -19,7 +27,6 @@ int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int* arr, int arr_s
     memset(send_buf[i], 0, sizeof(int)*2);
   }
   memset(recv_buf, 0, sizeof(int)*2);
-  printf("num_keys = %d\n", num_keys);
   for (i = 0; i < num_keys; i++ ) {
 
     int position = low;
@@ -86,6 +93,9 @@ int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int* arr, int arr_s
       if (rank == 0) {
         sendout = false;
       } else {
+#ifdef _DEBUG
+        printf("++++ Send: rank = %d, k = %d, i = %d\n", rank, k, i);
+#endif
         MPI_Isend(send_buf[0], 2, MPI_INT, 0, 2, comm, &req);
         MPI_Wait(&req, &status);
       }
@@ -103,6 +113,9 @@ int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int* arr, int arr_s
       if (rank == 0) {
         sendout = false;
       } else {
+#ifdef _DEBUG
+        printf("++++++++ Send: rank = %d, k = %d, i = %d\n", rank, k, i);
+#endif
         MPI_Isend(send_buf[1], 2, MPI_INT, 0, 1, comm, &req);
         MPI_Wait(&req, &status);
       }
@@ -116,9 +129,20 @@ int init_and_bsearch(MPI_Comm comm, int* keys, int num_keys, int* arr, int arr_s
       if (sendout) {
         MPI_Irecv(recv_buf, 2, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, comm, &req);
         MPI_Wait(&req, &status);
+#ifdef _DEBUG
+        printf("--- Recv: rank = %d, k = %d, i = %d\n", 
+            rank, recv_buf[0], recv_buf[1]);
+#endif
+
+      } else {
+        recv_buf[0] = position;
+        recv_buf[1] = i;
       }
 #endif
       (*pos)[recv_buf[1]] = recv_buf[0];
+
+      printf("\npos[%d] = %d\n", recv_buf[1], recv_buf[0]);
     }
+
   }
 }
