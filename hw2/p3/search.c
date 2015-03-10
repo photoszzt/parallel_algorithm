@@ -32,6 +32,7 @@ int main(int argc, char** argv) {
                keys, key_per_proc, MPI_INT, 0, comm);
   MPI_Barrier(comm);
 
+#ifdef _DEBUG
   if (rank == 0) {
     printf("Keys:\n");
     for (int i = 0; i < NUM_KEYS; i++) {
@@ -39,6 +40,7 @@ int main(int argc, char** argv) {
     }
     printf("\n");
   }
+#endif
 
 
 //  MPI_Scatter(arr, len, MPI_INT, sub_arr, len, MPI_INT, 0, comm);
