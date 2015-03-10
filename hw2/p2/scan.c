@@ -20,6 +20,7 @@ int main( int argc, char **argv){
 	
 	// problem setup
 	int n=30;
+        int i,j;
 	if(argc>1) n=atoi(argv[1]);
 	vec *x = (vec *) malloc( sizeof(vec)*n) ;
 	for(int i=0;i<n;i++) {
@@ -28,16 +29,17 @@ int main( int argc, char **argv){
         }
 
 	// print input
-	for(int i=0;i<n;i++)
-#if (DIMONTION > 1  )
+	for(i=0;i<n;i++) {
+#if (DIMENTION > 1)
           printf("(");
-          for (int j=0; j<DIMENTION-1; j++) {
+          for (j=0; j<DIMENTION-1; j++) {
             printf("%.3f,", x[i].vec[j]);
           }
           printf("%.3f)", x[i].vec[DIMENTION-1]);
 #else
           printf("%.3f ",x[i].vec[0]);
 #endif
+        }
         printf("\n");
 
 	// scan
@@ -47,19 +49,20 @@ int main( int argc, char **argv){
   printf("\nComputation time: %lld microseconds\n\n", (long long) duration);
 
 	//print output
-        for(int i=0;i<n;i++)
+  for(i=0;i<n;i++) {
 #if (DIMENTION > 1) 
-          printf("(");
-          for (int j=0; j<DIMENTION-1; j++) {
-            printf("%.3f,", x[i].vec[j]);
-          }
-          printf("%.3f)", x[i].vec[DIMENTION-1]);
+    printf("(");
+    for (j=0; j<DIMENTION-1; j++) {
+      printf("%.3f,", x[i].vec[j]);
+    }
+    printf("%.3f)", x[i].vec[DIMENTION-1]);
 #else 
-          printf("%.3f ",x[i].vec[0]);
+    printf("%.3f ",x[i].vec[0]);
 #endif
-        printf("\n");
+  }
+  printf("\n");
 
 	// clean up
-	free(x);
-	return 0;
+  free(x);
+  return 0;
 }

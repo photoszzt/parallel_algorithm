@@ -10,7 +10,7 @@ scan:scan.o genscan.o mtime.o
 	@g++ -fopenmp -g scan.o genscan.o mtime.o -o scan
 
 run:scan
-	@./scan 10
+	@OMP_NUM_THREADS=2 ./scan 8
 
 mtime.o: mtime.cpp
 	@g++ -c -Wall -O0 -g3 $< -o $@
@@ -18,4 +18,4 @@ mtime.o: mtime.cpp
 PHONY: clean
 
 clean:
-	@/bin/rm -rf *.o
+	@/bin/rm -rf *.o scan

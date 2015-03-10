@@ -15,7 +15,7 @@ void genericScan(void *X, int n, size_t l)
   int tid;
   int offset;
   int nthreads;
-  int step = (int)ceil(raw_step);
+  int step = (int)ceil(log2(n));
 #pragma omp parallel private(tid, i, j, nthreads, offset) shared(c, n, l, step) 
   {
     offset = 1;
