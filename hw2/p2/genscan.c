@@ -13,14 +13,15 @@ void genericScan(void *X, int n, size_t l)
   int i, j;
   char *c = (char *)X;
   int tid;
-  int offset = 1;
-  int step = (int)ceil(log2(n));
+  int offset;
   int nthreads;
-#pragma omp parallel private(tid, i, j, nthreads, offset) shared(c, step, n, l) 
+  int step = (int)ceil(raw_step);
+#pragma omp parallel private(tid, i, j, nthreads, offset) shared(c, n, l, step) 
   {
     offset = 1;
     tid = omp_get_thread_num();
     nthreads = omp_get_num_threads();
+    bool done=false;
     int temp = n >> 1;
 #ifdef _DEBUG
     if (tid == 0) printf("nthreads = %d\n", nthreads);
@@ -35,19 +36,28 @@ void genericScan(void *X, int n, size_t l)
     }
     temp  = 2;
     offset >>= 1;
+#ifdef _DEBUG
+    printf(" tid=%d,off=%d,step=%d ", tid, offset, step);
+#endif
     for (i = 1; i < step; i ++) {
       #pragma omp barrier
       offset >>= 1;
-      for (j = tid; j < temp; j += nthreads) {
-        int a = offset*(2*j+1)-1;
+      j=tid;
+      done=false;
+      while (!done && j < temp) {
+      int a = offset*(2*j+1)-1;
         int b = offset*(2*j)-1;
 #ifdef _DEBUG
-      printf(" off=%d,a=%d,b=%d ", offset, a, b);
+        printf(" tid=%d,off=%d,a=%d,b=%d,j=%d,temp=%d ", tid, offset, a, b, j, temp);
 #endif
+        if (a >= n)
+          done=true;
         if ( a < n && b > 0)
           ubop(c+a*l, c+b*l);
-      }
+        j+=nthreads;
+    } 
       temp *= 2;
+      
     }
   }
 }
