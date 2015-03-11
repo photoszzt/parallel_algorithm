@@ -153,6 +153,19 @@
 \end{figure}
 
 \FloatBarrier
+
+From Figure ~\ref{fig:1D_p2} and ~\ref{fig:4D_p2} and
+table ~\ref{table:1D_p2} and ~\ref{table:4D_p2}, the parallel execution runs
+slower than the sequential execution. The speed up of doubling the
+number of threads is less than 2. The results are out of our
+expectation and we have consider two reasons that may be related to
+this result. First, the cost of administering threads by OpenMP is
+high. Second, the input array is shared between multiple threads. 
+During execution, several threads may try to write to this array at
+different locations which will incur
+frequent cache coherence for different processors as each thread is pinned
+to a different processor.  
+
 \section{P3}
 \subsection{Algorithm}
 \begin{algorithmic}[1]
