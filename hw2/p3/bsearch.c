@@ -23,6 +23,7 @@ void init_keys(MPI_Comm comm, int* key_chunk, int key_per_proc, int arr_size,
 void init(MPI_Comm comm, int* sub_arr, int arr_size, int low) {
   srand(time(NULL));
   std::set<int> numbers_gen;
+#if 0
   for (int i = 0; i < arr_size; i++) {
     int new_val = rand() % arr_size + low;
     while (numbers_gen.find(new_val) != numbers_gen.end())
@@ -31,6 +32,11 @@ void init(MPI_Comm comm, int* sub_arr, int arr_size, int low) {
     numbers_gen.insert(new_val);
   } 
   std::sort(sub_arr, sub_arr+arr_size);
+#else
+  for (int i = 0; i < arr_size; i++) {
+    sub_arr[i] = low + i;
+  }
+#endif
 }
 
 void bsearch(MPI_Comm comm, int* keys, int num_keys, int* sub_arr, int arr_size, int num_ts, int rank) {
@@ -56,6 +62,7 @@ void bsearch(MPI_Comm comm, int* keys, int num_keys, int* sub_arr, int arr_size,
   memset(recv_buf, 0, sizeof(int)*2);
   for (i = 0; i < num_keys; i++ ) {
 
+    low = 0, high = arr_size - 1;
     int position = low;
     bool sendout = true;
     int k = keys[i];
@@ -128,8 +135,8 @@ void bsearch(MPI_Comm comm, int* keys, int num_keys, int* sub_arr, int arr_size,
       }
 #else
 #ifdef _PRINT_OUT
-      printf("#%d: key = %d, pos = %d\n", 
-          i, k, send_buf[0][0]);
+      printf("#%d: key = %d, pos = %d, chunk_pos = %d, left = %d \n", 
+          i, k, send_buf[0][0], position, sub_arr[0]);
 #endif
 #endif
     } else if ((k == sub_arr[high]) || (k == sub_arr[low])) {
@@ -153,8 +160,8 @@ void bsearch(MPI_Comm comm, int* keys, int num_keys, int* sub_arr, int arr_size,
       }
 #else
 #ifdef _PRINT_OUT
-      printf("#%d: key = %d, pos = %d\n", 
-          i, k, send_buf[1][0]);
+      printf("#%d: key = %d, pos = %d, chunk_pos = %d, left = %d \n", 
+          i, k, send_buf[1][0], position, sub_arr[0]);
 #endif
 #endif
     } 
