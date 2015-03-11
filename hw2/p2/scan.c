@@ -18,37 +18,37 @@ void userBinaryOperator(VEC_ADD_PRE, DIMENTION) ( void *x1, void *x2) {
 
 int main( int argc, char **argv){	
 	
-	// problem setup
-	int n=30;
-        int i,j;
-	if(argc>1) n=atoi(argv[1]);
-	vec *x = (vec *) malloc( sizeof(vec)*n) ;
-	for(int i=0;i<n;i++) {
-          for (int j=0; j < DIMENTION; j++)
-            x[i].vec[j] = i%2;
-        }
+  // problem setup
+  int n=30;
+  int i,j;
+  if(argc>1) n=atoi(argv[1]);
+  vec *x = (vec *) malloc( sizeof(vec)*n) ;
+  for(int i=0;i<n;i++) {
+    for (int j=0; j < DIMENTION; j++)
+      x[i].vec[j] = i%2;
+  }
 
-	// print input
-	for(i=0;i<n;i++) {
+  // print input
+  for(i=0;i<n;i++) {
 #if (DIMENTION > 1)
-          printf("(");
-          for (j=0; j<DIMENTION-1; j++) {
-            printf("%.3f,", x[i].vec[j]);
-          }
-          printf("%.3f)", x[i].vec[DIMENTION-1]);
+    printf("(");
+    for (j=0; j<DIMENTION-1; j++) {
+      printf("%.3f,", x[i].vec[j]);
+    }
+    printf("%.3f)", x[i].vec[DIMENTION-1]);
 #else
-          printf("%.3f ",x[i].vec[0]);
+    printf("%.3f ",x[i].vec[0]);
 #endif
-        }
-        printf("\n");
+  }
+  printf("\n");
 
-	// scan
+  // scan
   int64_t start = GetTimeMius64();
-	genericScan((void*) x,n,sizeof(vec));
+  genericScan((void*) x,n,sizeof(vec));
   int64_t duration = GetTimeMiusFrom(start);
   printf("\nComputation time: %lld microseconds\n\n", (long long) duration);
 
-	//print output
+  //print output
   for(i=0;i<n;i++) {
 #if (DIMENTION > 1) 
     printf("(");
@@ -62,7 +62,7 @@ int main( int argc, char **argv){
   }
   printf("\n");
 
-	// clean up
+  // clean up
   free(x);
   return 0;
 }

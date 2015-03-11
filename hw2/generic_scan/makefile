@@ -1,16 +1,19 @@
-all:scan run
+all:seqscan run
 
 mtime.o: mtime.cpp
+	@g++ -c -Wall -O0 -g3 $< -o $@
+
+genscan.o: genscan.c
 	@g++ -c -Wall -O0 -g3 $< -o $@
 
 scan.o: scan.c
 	@g++ -c -Wall -O0 -g3 $< -o $@
 
-scan:scan.o genscan.o mtime.o
-	@g++ scan.o genscan.o mtime.o -o scan
+seqscan:scan.o genscan.o mtime.o
+	@g++ scan.o genscan.o mtime.o -o seqscan
 
-run:scan
-	@./scan 10
+run:seqscan
+	@./seqscan 10
 
 clean:
-	@/bin/rm -rf *.o
+	@/bin/rm -rf *.o scan
