@@ -3,6 +3,7 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{tabularx}
+\usepackage[section]{placeins}
 \usepackage{geometry}
 \geometry{margin=1in}
 \begin{document}
@@ -114,7 +115,7 @@
   \label{table:1D_p2}
 \end{table}
 
-\begin{figure}[h]
+\begin{figure}[!htb]
   \centering
   \includegraphics[width=\textwidth]{fig/1D_p2}
   \caption{Wall clock execution time for different array size with
@@ -143,7 +144,7 @@
   \label{table:4D_p2}
 \end{table}
 
-\begin{figure}[h]
+\begin{figure}[!htb]
   \centering
   \includegraphics[width=\textwidth]{fig/4D_p2}
   \caption{Timing measurements for different array size with different
@@ -151,7 +152,67 @@
   \label{fig:4D_p2}
 \end{figure}
 
-
+\FloatBarrier
 \section{P3}
+\subsection{Algorithm}
+\begin{algorithmic}[1]
+\Function{search}{$comm, keys, num\_keys, sub\_arr, arr\_size,
+  num\_threads, rank$} \label{alg:p3}
+\State $low\_pos = arr\_size * rank$
+\State $high\_pos = low\_pos + arr\_size - 1$
+\State $low = 0$
+\State $high = arr\_size - 1$
+\For {$i = 0; i < num\_keys; i++$}
+\State $low = 0$
+\State $high = arr\_size - 1$
+\State $position=low$
+\State $k = keys[i]$
+\If {$k < sub\_arr[high] \wedge k > sub\_arr[low]$}
+\If {$arr\_size - 1 <= num\_threads$}
+\ParFor {$i=1:num\_threads$}
+\If {$sub\_arr[low+i] <= k$}
+\State $position = low$
+\EndIf
+\EndParFor
+\Else
+\State $len = (arr\_size - 1)/(num\_threads + 1)$
+\State $position = low$
+\While {$len != 1$}
+\ParFor{$i=i:num\_threads$}
+\State $left = low + i * len$
+\State $right = (left + len - 1) > high ? high : (left + len - 1)$
+\If {$sub\_arr[left] == k$}
+\State $position=left$
+\State $len = 1$
+\ElsIf {$sub\_arr[right] == k$}
+\State $position=right$
+\State $len=1$
+\Else
+\If {$sub\_arr[left] < k \wedge sub\_arr[right] > k$}
+\State $len=(len-1)/(num\_threads + 1)$
+\State $low = left$
+\State $high = right$
+\State $position = low$
+\EndIf
+\EndIf
+\EndParFor
+\EndWhile
+\EndIf
+\State $position=position+low\_pos$
+\State Output position
+\ElsIf {$k == sub\_arr[high]$}
+\State $position = high + low\_pos$
+\State Output position
+\Else
+\If {$k == sub\_arr[low]$}
+\State $position = low + low\_pos$
+\State Output position
+\EndIf
+\EndIf
+\EndFor
+\EndFunction
+\end{algorithmic}
+\subsection{Result}
+
 
 \end{document}
