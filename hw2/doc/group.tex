@@ -225,7 +225,24 @@ to a different processor.
 \EndFor
 \EndFunction
 \end{algorithmic}
-\subsection{Result}
 
+\subsection{Result}
+\begin{table}[h]
+  \centering
+  \begin{tabular}{|c|c|c|c|c|}
+    \hline
+    Length & 1 core & 1 socket & 1 node & 2 node \\
+    \hline
+    \hline
+  \end{tabular}
+  \caption{Wall clock execution time for different configurations to
+    search array with different length}
+  \label{table:p3}
+\end{table}
+
+We have sussessfully run the program with 16 keys but for large
+keyspace($2^{20}$ keys) our program hangs. We could not figure out the
+reason for hanging but we suspect that we do not have enough memory to
+support the full execution. 
 
 \end{document}
