@@ -233,7 +233,16 @@ to a different processor.
     \hline
     Length & 1 core & 1 socket & 1 node & 2 node \\
     \hline
+    1M          &	285061	& 123865 &	137027 &
+    1039996\\
     \hline
+10M	& 473831 &	1954484	& 454789 &	651387\\
+\hline
+100M   	& Time-out &	Time-out &	5469404	& 1771428\\
+\hline
+1B 	& Time-out &	Time-out &	Time-out &	Time-out\\
+\hline
+
   \end{tabular}
   \caption{Wall clock execution time for different configurations to
     search array with different length}
@@ -243,6 +252,7 @@ to a different processor.
 We have sussessfully run the program with 16 keys but for large
 keyspace($2^{20}$ keys) our program hangs. We could not figure out the
 reason for hanging but we suspect that we do not have enough memory to
-support the full execution. 
+support the full execution. The sequential case is running with
+$2^{20}$ keys. 
 
 \end{document}
