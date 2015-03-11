@@ -16,7 +16,8 @@ void init_keys(MPI_Comm comm, int* key_chunk, int key_per_proc, int arr_size,
     int rank) {
   srand(time(NULL) + rank);
   for (int i = 0; i < key_per_proc; i++) {
-    key_chunk[i] = rand() % arr_size;
+//    key_chunk[i] = rand() % arr_size;
+    key_chunk[i] = i + key_per_proc * rank;
   }
 }
 
@@ -82,27 +83,47 @@ void bsearch(MPI_Comm comm, int* keys, int num_keys, int* sub_arr, int arr_size,
 #pragma omp barrier
         }
       } else {
+#if 1
         int len = (arr_size - 1) / num_ts + 1;
         position = low;
 
-        while (len > 1) {
 
-          int new_arr_size = high - low;
-          if (new_arr_size - 1 <= num_ts) {
-          // each thread deals with size=1 interval
+
+
+
+
+
+
+
+        while (len > 1 && high - low -1 > num_ts) {
+
+
+
+
+
+/** FIX **/
+#if 1
+      int new_arr_size = high - low;
+
+      if (new_arr_size - 1 <= num_ts) {
+        // each thread deals with size=1 interval
 #pragma omp parallel shared(keys, num_keys, sub_arr, new_arr_size, low, high, k, position, i) private(tid,nthreads) num_threads(num_ts) 
-            {
-              tid = omp_get_thread_num();
-              nthreads = omp_get_num_threads();
+        {
+          tid = omp_get_thread_num();
+          nthreads = omp_get_num_threads();
 
-              if ((tid < new_arr_size - 1) && sub_arr[low + tid] <= k 
-                  && sub_arr[low + tid + 1]) {
-                position = low;
-              }
-#pragma omp barrier
-            }
-            break;
+          if ((tid < new_arr_size - 1) && sub_arr[low + tid] <= k && sub_arr[low + tid + 1]) {
+            position = low;
           }
+#pragma omp barrier
+        }
+break;
+      }
+#endif
+
+
+
+
 
 
         // each thread deals with a interval, need binary search
@@ -115,48 +136,58 @@ void bsearch(MPI_Comm comm, int* keys, int num_keys, int* sub_arr, int arr_size,
             printf("len = %d, tid = %d, nthreads = %d\n", len, tid, nthreads);
 #endif
 
-            int left = low + tid * len;
+            int left = (low + tid * len) > high ? high : (low + tid * len);
             int right = (left + len - 1) > high ? high : (left + len - 1);
 
+
+
+
+#if 1
+if (left < arr_size && right < arr_size) { 
             if (sub_arr[left] == k) {
               position = left;
               len = 1;
             } else if (sub_arr[right] == k) {
               position = right;
               len = 1;
-            } else if (sub_arr[left] < k && sub_arr[right] > k) {
+            }
+#if 0
+    else {len = 1;
               low = left;
               high = right;
-              len = (high - low - 1) / nthreads + 1;
+              position = low;}
+#endif
+#if 1
+ else if (sub_arr[left] < k && sub_arr[right] > k) {
+              low = left;
+              high = right;
+              int len_new = (high - low - 1) / nthreads + 1;
+if (len_new < len) {len = len_new;}
+else {len = 1;}
+printf("Rank %d, left %d, right %d, len %d\n", rank, left, right, len);
+//len = 1;
               position = low;
             }
+#endif
+} else { 
+len = 1;
+}
+#endif
+//len = 1;
+
+
+
 #pragma omp barrier
+
+
           }
 
         }
+printf(">>>>>>>>>>>>>>>>>>>>>>");
+
+#endif
       }
 
-      send_buf[0][0] = position + low_pos;
-      send_buf[0][1] = i;
-
-      MPI_Request req;
-      MPI_Status status;
-#ifdef _MPI_SEND
-      if (rank == 0) {
-        sendout = false;
-      } else {
-#ifdef _DEBUG
-        printf("++++ Send: rank = %d, k = %d, i = %d\n", rank, k, i);
-#endif
-        MPI_Isend(send_buf[0], 2, MPI_INT, 0, 2, comm, &req);
-        MPI_Wait(&req, &status);
-      }
-#else
-#ifdef _PRINT_OUT
-      printf("#%d: key = %d, pos = %d, chunk_pos = %d, left = %d \n", 
-          i, k, send_buf[0][0], position, sub_arr[0]);
-#endif
-#endif
     } else if ((k == sub_arr[high]) || (k == sub_arr[low])) {
       if (k == sub_arr[high])
         send_buf[1][0] = high + low_pos;
@@ -164,53 +195,6 @@ void bsearch(MPI_Comm comm, int* keys, int num_keys, int* sub_arr, int arr_size,
         send_buf[1][0] = low + low_pos;
       send_buf[1][1] = i;
 
-      MPI_Request req;
-      MPI_Status status;
-#ifdef _MPI_SEND
-      if (rank == 0) {
-        sendout = false;
-      } else {
-#ifdef _DEBUG
-        printf("++++++++ Send: rank = %d, k = %d, i = %d\n", rank, k, i);
-#endif
-        MPI_Isend(send_buf[1], 2, MPI_INT, 0, 1, comm, &req);
-        MPI_Wait(&req, &status);
-      }
-#else
-#ifdef _PRINT_OUT
-      printf("#%d: key = %d, pos = %d, chunk_pos = %d, left = %d \n", 
-          i, k, send_buf[1][0], position, sub_arr[0]);
-#endif
-#endif
     } 
-    if (rank == 0) {
-
-      MPI_Request req;
-      MPI_Status status;
-#ifdef _MPI_SEND
-      if (sendout) {
-        MPI_Irecv(recv_buf, 2, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, comm, &req);
-        MPI_Wait(&req, &status);
-#ifdef _DEBUG
-        printf("--- Recv: rank = %d, k = %d, i = %d\n", 
-            rank, recv_buf[0], recv_buf[1]);
-#endif
-
-      } else {
-        recv_buf[0] = position + low_pos;
-        recv_buf[1] = i;
-      }
-
-      //(*pos)[recv_buf[1]] = recv_buf[0];
-#endif
-
-#ifdef _MPI_SEND
-#ifdef _PRINT_OUT
-      printf("#%d: key = %d, pos = %d\n", 
-          recv_buf[1], keys[recv_buf[1]], recv_buf[0]);
-#endif
-#endif
-    }
-
   }
 }
