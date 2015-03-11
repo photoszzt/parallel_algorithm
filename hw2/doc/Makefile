@@ -1,4 +1,4 @@
-FILE=report
+FILE=group
 
 MAIN_LATEX=$(FILE).tex
 OUT_PDF=$(FILE).pdf

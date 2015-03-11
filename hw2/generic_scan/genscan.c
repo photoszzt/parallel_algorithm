@@ -1,6 +1,5 @@
 #include <stdlib.h>
-
-void userBinaryOperator(void *input1andOutput, void *input2);
+#include "scan.h"
 
 #define ubop(x1,x2) userBinaryOperator( (void *) (x1), (void *) (x2) );
 
