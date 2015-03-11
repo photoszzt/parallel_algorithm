@@ -23,7 +23,7 @@ void init_keys(MPI_Comm comm, int* key_chunk, int key_per_proc, int arr_size,
 void init(MPI_Comm comm, int* sub_arr, int arr_size, int low) {
   srand(time(NULL));
   std::set<int> numbers_gen;
-#if 0
+#if 1
   for (int i = 0; i < arr_size; i++) {
     int new_val = rand() % arr_size + low;
     while (numbers_gen.find(new_val) != numbers_gen.end())
@@ -85,25 +85,7 @@ void bsearch(MPI_Comm comm, int* keys, int num_keys, int* sub_arr, int arr_size,
         int len = (arr_size - 1) / num_ts + 1;
         position = low;
 
-        while (len > 1) {
-
-          int new_arr_size = high - low;
-          if (new_arr_size - 1 <= num_ts) {
-          // each thread deals with size=1 interval
-#pragma omp parallel shared(keys, num_keys, sub_arr, new_arr_size, low, high, k, position, i) private(tid,nthreads) num_threads(num_ts) 
-            {
-              tid = omp_get_thread_num();
-              nthreads = omp_get_num_threads();
-
-              if ((tid < new_arr_size - 1) && sub_arr[low + tid] <= k 
-                  && sub_arr[low + tid + 1]) {
-                position = low;
-              }
-#pragma omp barrier
-            }
-            break;
-          }
-
+        while (len != 1) {
 
         // each thread deals with a interval, need binary search
 #pragma omp parallel shared(keys, num_keys, sub_arr, arr_size, low, high, k, position, i, len) private(tid,nthreads) num_threads(num_ts) 
@@ -125,9 +107,9 @@ void bsearch(MPI_Comm comm, int* keys, int num_keys, int* sub_arr, int arr_size,
               position = right;
               len = 1;
             } else if (sub_arr[left] < k && sub_arr[right] > k) {
+              len = (len - 1) / num_ts + 1;
               low = left;
               high = right;
-              len = (high - low - 1) / nthreads + 1;
               position = low;
             }
 #pragma omp barrier
